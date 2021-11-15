@@ -49,6 +49,7 @@
   <ItemGroup>
      <Compile Include="Assets\Unity UI Samples\Scripts\ResizePanel.cs" />
      <Compile Include="Assets\Unity UI Samples\Scripts\DragPanel.cs" />
+     <Compile Include="Assets\main.cs" />
      <Compile Include="Assets\Unity UI Samples\Scripts\PanelManager.cs" />
      <Compile Include="Assets\Unity UI Samples\Scripts\ApplicationManager.cs" />
      <Compile Include="Assets\Unity UI Samples\Scripts\ActiveStateToggler.cs" />

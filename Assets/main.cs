@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class main : MonoBehaviour
@@ -10,9 +11,16 @@ public class main : MonoBehaviour
     bool playState = false; //Booleana responsável por renderizar ou não os objetos do jogo
     public float posY = 0;      //Posição dos objetos no eixo Y
     public float posX = 0;      //Posição dos objetos no eixo X
-    Enemy enemy = new Enemy(0-Screen.width/2, 0);
+
+    public bool enemiesWalk = true;
+    public bool walkAux = true;
+    Stopwatch stopWatch = new Stopwatch();
+
+    List<Enemy> enemies = new List<Enemy>();
 
     Player player = new Player(0, 5-Screen.height/2);
+
+    List<Shot> gameShots = new List<Shot>();
 
 
 
@@ -21,13 +29,51 @@ public class main : MonoBehaviour
     private void Start()
     {
         sb = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height));
-        
+
+        for(int i = 0; i < 6; i++){
+            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*30)), 100);
+            enemies.Add(enemy);
+        }
+        for(int i = 0; i < 6; i++){
+            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*30)), 70);
+            enemies.Add(enemy);
+        }
+        for(int i = 0; i < 6; i++){
+            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*30)), 40);
+            enemies.Add(enemy);
+        }
+
+        stopWatch.Start();
+
+
     }
 
     // Update is called once per frame
     private void Update()
     {
         sb = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height));
+        
+        if(stopWatch.Elapsed.Seconds % 19 == 0 && stopWatch.Elapsed.Seconds != 0 && walkAux){
+            foreach(Enemy enemy in enemies){
+                enemy.posY = enemy.posY - enemy.dy;
+            }
+            enemiesWalk = !enemiesWalk;
+            walkAux = false;
+        }
+
+        if(stopWatch.Elapsed.Seconds % 3 == 0 && enemiesWalk && stopWatch.Elapsed.Seconds != 0){
+            foreach(Enemy enemy in enemies){
+                enemy.posX = enemy.posX + enemy.dx;
+            }
+            walkAux = true;
+        }
+        else if(stopWatch.Elapsed.Seconds % 3 == 0 && !enemiesWalk && stopWatch.Elapsed.Seconds != 0){
+            foreach(Enemy enemy in enemies){
+                enemy.posX = enemy.posX - enemy.dx;
+            }
+            walkAux  = true;
+        }
+        
 
         if(Input.GetKey(KeyCode.LeftArrow))
         {
@@ -37,16 +83,34 @@ public class main : MonoBehaviour
         {
             player.posX += player.dx;
         }
-        if (Input.GetKey(KeyCode.Space))
+        if ((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow)))
         {
             player.shot = true;
+            gameShots.Add(player.shooting());
+        }
+
+        if(player.shot){
+            gameShots[1].posY += gameShots[1].dy;
+        }
+
+        if(gameShots[1].posY > Screen.height){
+            gameShots.Clear();
+            player.shot = false;
         }
     }
 
     private void OnPostRender()
     {
-       enemy.hitBox(mat);
-       player.hitBox(mat);
+        foreach(Enemy enemy in enemies){
+            enemy.hitBox(mat);
+
+        }
+
+        player.hitBox(mat);
+
+        if(player.shot){
+            gameShots[1].hitBox(mat);
+        }
     }
     #endregion
 
@@ -84,13 +148,19 @@ public class main : MonoBehaviour
             GL.End();
             GL.PopMatrix();
         }
+
+        public Shot shooting(){
+            Shot playerShot = new Shot(this.posX+15, this.posY);
+
+            return playerShot;
+        }
     }
 
     public class Enemy{
         public float posX;
         public float posY;
-        public float dx = 1;
-        public float dy = 1;
+        public float dx = 0.25f;
+        public float dy = 2;
         public bool inGame;
         public bool shot;
         public Enemy(float posX, float posY){
@@ -120,8 +190,51 @@ public class main : MonoBehaviour
     }
 
     public class Cover{
-        public Cover(){
+        public float posX;
+        public float posY;
+        public Cover(float posX, float posY){
+            this.posX = posX;
+            this.posY = posY;
+        }
 
+        public void hitBox(Material mat){
+            GL.PushMatrix();
+            mat.SetPass(0);
+            GL.Color(Color.red);
+            GL.Begin(GL.QUADS);
+
+            GL.Vertex3(this.posX, this.posY, 0);
+            GL.Vertex3(this.posX, this.posY+25, 0);
+            GL.Vertex3(this.posX+25, this.posY+25, 0);
+            GL.Vertex3(this.posX+25, this.posY, 0);
+
+            GL.End();
+            GL.PopMatrix();
+        }
+    }
+
+    public class Shot{
+
+        public float posX;
+        public float posY;
+        public float dy = 2;
+        public Shot(float posX, float posY){
+            this.posX = posX;
+            this.posY = posY;
+        }
+
+        public void hitBox(Material mat){
+            GL.PushMatrix();
+            mat.SetPass(0);
+            GL.Begin(GL.QUADS);
+
+            GL.Vertex3(this.posX, this.posY, 0);
+            GL.Vertex3(this.posX, this.posY+7, 0);
+            GL.Vertex3(this.posX+5, this.posY+7, 0);
+            GL.Vertex3(this.posX+5, this.posY, 0);
+
+            GL.End();
+            GL.PopMatrix();
         }
     }
     #endregion

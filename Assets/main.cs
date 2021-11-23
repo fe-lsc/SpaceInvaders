@@ -61,13 +61,13 @@ public class main : MonoBehaviour
             walkAux = false;
         }
 
-        if(stopWatch.Elapsed.Seconds % 3 == 0 && enemiesWalk && stopWatch.Elapsed.Seconds != 0){
+        if(stopWatch.Elapsed.Seconds % 3 == 0 && enemiesWalk && stopWatch.Elapsed.Seconds != 0 && stopWatch.Elapsed.Seconds % 19 != 0){
             foreach(Enemy enemy in enemies){
                 enemy.posX = enemy.posX + enemy.dx;
             }
             walkAux = true;
         }
-        else if(stopWatch.Elapsed.Seconds % 3 == 0 && !enemiesWalk && stopWatch.Elapsed.Seconds != 0){
+        else if(stopWatch.Elapsed.Seconds % 3 == 0 && !enemiesWalk && stopWatch.Elapsed.Seconds != 0 && stopWatch.Elapsed.Seconds % 19 != 0){
             foreach(Enemy enemy in enemies){
                 enemy.posX = enemy.posX - enemy.dx;
             }
@@ -83,20 +83,49 @@ public class main : MonoBehaviour
         {
             player.posX += player.dx;
         }
-        if ((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow)))
+        if (((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow))) && player.shot)
         {
-            player.shot = true;
             gameShots.Add(player.shooting());
-        }
-
-        if(player.shot){
-            gameShots[1].posY += gameShots[1].dy;
-        }
-
-        if(gameShots[1].posY > Screen.height){
-            gameShots.Clear();
             player.shot = false;
         }
+
+        foreach (var bullet in gameShots)
+        {
+            bullet.posY = bullet.posY + bullet.dy;
+
+            if(player.collides(bullet)){
+                gameShots.Remove(bullet);
+            }
+
+            
+            if(bullet.posY > Screen.height - 100 || (bullet.posY+20 < (0 - Screen.height/2) && bullet.dy < 0)){
+                gameShots.Remove(bullet);
+                
+                if(bullet.Equals(player.bullet)){
+                    player.shot = true;
+                }
+            }
+
+            foreach (var enemy in enemies)
+            {
+                if(enemy.collides(bullet) && bullet.dy > 0){
+
+                    enemies.Remove(enemy);
+
+                    gameShots.Remove(bullet);
+                    player.shot = true;
+                }
+            }
+            
+        }
+
+        foreach (var enemy in enemies)
+        {
+            if(Random.Range(0,1000) > 998){
+                gameShots.Add(enemy.shooting());
+            } 
+        }
+
     }
 
     private void OnPostRender()
@@ -108,8 +137,9 @@ public class main : MonoBehaviour
 
         player.hitBox(mat);
 
-        if(player.shot){
-            gameShots[1].hitBox(mat);
+        foreach (var bullet in gameShots)
+        {
+            bullet.hitBox(mat);
         }
     }
     #endregion
@@ -127,12 +157,21 @@ public class main : MonoBehaviour
         public float dx = 2;
         public bool inGame;
         public bool shot;
+        public Shot bullet;
         public Player(float posX, float posY){
             this.posX = posX;
             this.posY = posY;
 
             this.inGame = true;
-            this.shot = false;
+            this.shot = true;
+        }
+
+        public bool collides(Shot shot){
+            if(shot.posY+7 > this.posY && shot.posY < this.posY+10 && shot.posX+5 > this.posX && shot.posX < this.posX+30 ){
+                return true;
+            }
+
+            return false;
         }
 
         public void hitBox(Material mat){
@@ -150,7 +189,8 @@ public class main : MonoBehaviour
         }
 
         public Shot shooting(){
-            Shot playerShot = new Shot(this.posX+15, this.posY);
+            Shot playerShot = new Shot(this.posX+15, this.posY+12, 2);
+            this.bullet = playerShot;
 
             return playerShot;
         }
@@ -162,13 +202,19 @@ public class main : MonoBehaviour
         public float dx = 0.25f;
         public float dy = 2;
         public bool inGame;
-        public bool shot;
         public Enemy(float posX, float posY){
             this.posX = posX;
             this.posY = posY;
 
             this.inGame = true;
-            this.shot = false;
+        }
+
+        public bool collides(Shot shot){
+            if(shot.posY+7 > this.posY && shot.posY < this.posY+20 && shot.posX+5 > this.posX && shot.posX < this.posX+20 ){
+                return true;
+            }
+
+            return false;
         }
 
         public void hitBox(Material mat){
@@ -186,6 +232,12 @@ public class main : MonoBehaviour
             GL.End();
             GL.PopMatrix();
 
+        }
+
+        public Shot shooting(){
+            Shot enemyShot = new Shot(this.posX+10, this.posY-2, -2);
+
+            return enemyShot;
         }
     }
 
@@ -217,10 +269,11 @@ public class main : MonoBehaviour
 
         public float posX;
         public float posY;
-        public float dy = 2;
-        public Shot(float posX, float posY){
+        public float dy;
+        public Shot(float posX, float posY, float dy){
             this.posX = posX;
             this.posY = posY;
+            this.dy = dy;
         }
 
         public void hitBox(Material mat){

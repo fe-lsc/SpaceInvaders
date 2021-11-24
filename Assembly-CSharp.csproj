@@ -50,6 +50,8 @@
      <Compile Include="Assets\Unity UI Samples\Scripts\TiltWindow.cs" />
      <None Include="Assets\Unity UI Samples\Textures and Sprites\SF UI\Background\LICENSE.txt" />
      <None Include="Assets\Unity UI Samples\Materials\UI-Default-No-Alpha.shader" />
+     <None Include="Assets\Shaders\UnityVC\StandardVC.shader" />
+     <None Include="Assets\Shaders\UnityVC\UnityVC.cginc" />
      <None Include="Assets\Unity UI Samples\Fonts\Jupiter\LICENSE.txt" />
     <Reference Include="UnityEngine">
         <HintPath>C:/Program Files/Unity/Hub/Editor/2020.3.17f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

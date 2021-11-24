@@ -83,7 +83,7 @@ public class main : MonoBehaviour
         {
             player.posX += player.dx;
         }
-        if (((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow))) && player.shot)
+        if (((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow))) && player.shot && player.inGame)
         {
             gameShots.Add(player.shooting());
             player.shot = false;
@@ -95,6 +95,7 @@ public class main : MonoBehaviour
 
             if(player.collides(bullet)){
                 gameShots.Remove(bullet);
+                player.inGame = false;
             }
 
             
@@ -131,11 +132,16 @@ public class main : MonoBehaviour
     private void OnPostRender()
     {
         foreach(Enemy enemy in enemies){
-            enemy.hitBox(mat);
+            //enemy.hitBox(mat);
+            enemy.enemyArt(mat);
 
         }
 
-        player.hitBox(mat);
+        if(player.inGame){
+            //player.hitBox(mat);
+            player.playerArt(mat);
+        }
+
 
         foreach (var bullet in gameShots)
         {
@@ -177,19 +183,151 @@ public class main : MonoBehaviour
         public void hitBox(Material mat){
             GL.PushMatrix();
             mat.SetPass(0);
+            GL.Color(Color.blue);
             GL.Begin(GL.QUADS);
 
             GL.Vertex3(this.posX, this.posY, 0);
-            GL.Vertex3(this.posX, this.posY+10, 0);
-            GL.Vertex3(this.posX+30, this.posY+10, 0);
+            GL.Vertex3(this.posX, this.posY+19, 0);
+            GL.Vertex3(this.posX+55, this.posY+19, 0);
+            GL.Vertex3(this.posX+55, this.posY, 0);
+
+            GL.End();
+            GL.PopMatrix();
+        }
+        public void playerArt(Material mat){
+            GL.PushMatrix();
+            mat.SetPass(0);
+            GL.Begin(GL.LINES);
+
+            GL.Vertex3(this.posX, this.posY, 0);
+            GL.Vertex3(this.posX, this.posY+3, 0);
+                GL.Vertex3(this.posX, this.posY+3, 0);
+                GL.Vertex3(this.posX+3, this.posY+3, 0);
+            GL.Vertex3(this.posX+3, this.posY+3, 0);
+            GL.Vertex3(this.posX+3, this.posY+6, 0);
+                GL.Vertex3(this.posX+3, this.posY+6, 0);
+                GL.Vertex3(this.posX+6, this.posY+6, 0);
+            GL.Vertex3(this.posX+6, this.posY+6, 0);
+            GL.Vertex3(this.posX+6, this.posY+9, 0);
+                GL.Vertex3(this.posX+6, this.posY+9, 0);
+                GL.Vertex3(this.posX+9, this.posY+9, 0);
+            GL.Vertex3(this.posX+9, this.posY+9, 0);
+            GL.Vertex3(this.posX+9, this.posY+15, 0);
+                GL.Vertex3(this.posX+9, this.posY+15, 0);
+                GL.Vertex3(this.posX+12, this.posY+15, 0);
+            GL.Vertex3(this.posX+12, this.posY+15, 0);
+            GL.Vertex3(this.posX+12, this.posY+24, 0);
+                GL.Vertex3(this.posX+12, this.posY+24, 0);
+                GL.Vertex3(this.posX+15, this.posY+24, 0);
+            GL.Vertex3(this.posX+15, this.posY+24, 0);
+            GL.Vertex3(this.posX+15, this.posY+18, 0);
+                GL.Vertex3(this.posX+15, this.posY+18, 0);
+                GL.Vertex3(this.posX+21, this.posY+18, 0);
+            GL.Vertex3(this.posX+21, this.posY+18, 0);
+            GL.Vertex3(this.posX+21, this.posY+24, 0);
+                GL.Vertex3(this.posX+21, this.posY+24, 0);
+                GL.Vertex3(this.posX+24, this.posY+24, 0);
+            GL.Vertex3(this.posX+24, this.posY+24, 0);
+            GL.Vertex3(this.posX+24, this.posY+33, 0);
+                GL.Vertex3(this.posX+24, this.posY+33, 0);
+                GL.Vertex3(this.posX+30, this.posY+33, 0);
+            GL.Vertex3(this.posX+30, this.posY+33, 0);
+            GL.Vertex3(this.posX+30, this.posY+24, 0);
+                GL.Vertex3(this.posX+30, this.posY+24, 0);
+                GL.Vertex3(this.posX+33, this.posY+24, 0);
+            GL.Vertex3(this.posX+33, this.posY+24, 0);
+            GL.Vertex3(this.posX+33, this.posY+18, 0);
+                GL.Vertex3(this.posX+33, this.posY+18, 0);
+                GL.Vertex3(this.posX+39, this.posY+18, 0);
+            GL.Vertex3(this.posX+39, this.posY+18, 0);
+            GL.Vertex3(this.posX+39, this.posY+18, 0);
+                GL.Vertex3(this.posX+39, this.posY+18, 0);
+                GL.Vertex3(this.posX+39, this.posY+24, 0);
+            GL.Vertex3(this.posX+39, this.posY+24, 0);
+            GL.Vertex3(this.posX+42, this.posY+24, 0);
+                GL.Vertex3(this.posX+42, this.posY+24, 0);
+                GL.Vertex3(this.posX+42, this.posY+15, 0);
+            GL.Vertex3(this.posX+42, this.posY+15, 0);
+            GL.Vertex3(this.posX+45, this.posY+15, 0);
+                GL.Vertex3(this.posX+45, this.posY+15, 0);
+                GL.Vertex3(this.posX+45, this.posY+9, 0);
+            GL.Vertex3(this.posX+45, this.posY+9, 0);
+            GL.Vertex3(this.posX+48, this.posY+9, 0);
+                GL.Vertex3(this.posX+48, this.posY+9, 0);
+                GL.Vertex3(this.posX+48, this.posY+6, 0);
+            GL.Vertex3(this.posX+48, this.posY+6, 0);
+            GL.Vertex3(this.posX+51, this.posY+6, 0);
+                GL.Vertex3(this.posX+51, this.posY+6, 0);
+                GL.Vertex3(this.posX+51, this.posY+3, 0);
+            GL.Vertex3(this.posX+51, this.posY+3, 0);
+            GL.Vertex3(this.posX+54, this.posY+3, 0);
+                GL.Vertex3(this.posX+54, this.posY+3, 0);
+                GL.Vertex3(this.posX+54, this.posY+0, 0);
+            GL.Vertex3(this.posX+54, this.posY+0, 0);
+            GL.Vertex3(this.posX+48, this.posY+0, 0);
+                GL.Vertex3(this.posX+48, this.posY+0, 0);
+                GL.Vertex3(this.posX+48, this.posY-3, 0);
+            GL.Vertex3(this.posX+48, this.posY-3, 0);
+            GL.Vertex3(this.posX+45, this.posY-3, 0);
+                GL.Vertex3(this.posX+45, this.posY-3, 0);
+                GL.Vertex3(this.posX+45, this.posY, 0);
+            GL.Vertex3(this.posX+45, this.posY, 0);
+            GL.Vertex3(this.posX+42, this.posY, 0);
+                GL.Vertex3(this.posX+42, this.posY, 0);
+                GL.Vertex3(this.posX+42, this.posY+3, 0);
+            GL.Vertex3(this.posX+42, this.posY+3, 0);
+            GL.Vertex3(this.posX+39, this.posY+3, 0);
+                GL.Vertex3(this.posX+39, this.posY+3, 0);
+                GL.Vertex3(this.posX+39, this.posY-3, 0);
+            GL.Vertex3(this.posX+39, this.posY-3, 0);
+            GL.Vertex3(this.posX+36, this.posY-3, 0);
+                GL.Vertex3(this.posX+36, this.posY-3, 0);
+                GL.Vertex3(this.posX+36, this.posY-6, 0);
+            GL.Vertex3(this.posX+36, this.posY-6, 0);
+            GL.Vertex3(this.posX+33, this.posY-6, 0);
+                GL.Vertex3(this.posX+33, this.posY-6, 0);
+                GL.Vertex3(this.posX+33, this.posY, 0);
+            GL.Vertex3(this.posX+33, this.posY, 0);
             GL.Vertex3(this.posX+30, this.posY, 0);
+                GL.Vertex3(this.posX+30, this.posY, 0);
+                GL.Vertex3(this.posX+30, this.posY+3, 0);
+            GL.Vertex3(this.posX+30, this.posY+3, 0);
+            GL.Vertex3(this.posX+24, this.posY+3, 0);
+                GL.Vertex3(this.posX+24, this.posY+3, 0);
+                GL.Vertex3(this.posX+24, this.posY, 0);
+            GL.Vertex3(this.posX+24, this.posY, 0);
+            GL.Vertex3(this.posX+21, this.posY, 0);
+                GL.Vertex3(this.posX+21, this.posY, 0);
+                GL.Vertex3(this.posX+21, this.posY-6, 0);
+            GL.Vertex3(this.posX+21, this.posY-6, 0);
+            GL.Vertex3(this.posX+18, this.posY-6, 0);
+                GL.Vertex3(this.posX+18, this.posY-6, 0);
+                GL.Vertex3(this.posX+18, this.posY-3, 0);
+            GL.Vertex3(this.posX+18, this.posY-3, 0);
+            GL.Vertex3(this.posX+15, this.posY-3, 0);
+                GL.Vertex3(this.posX+15, this.posY-3, 0);
+                GL.Vertex3(this.posX+15, this.posY+3, 0);
+            GL.Vertex3(this.posX+15, this.posY+3, 0);
+            GL.Vertex3(this.posX+12, this.posY+3, 0);
+                GL.Vertex3(this.posX+12, this.posY+3, 0);
+                GL.Vertex3(this.posX+12, this.posY, 0);
+            GL.Vertex3(this.posX+12, this.posY, 0);
+            GL.Vertex3(this.posX+9, this.posY, 0);
+                GL.Vertex3(this.posX+9, this.posY, 0);
+                GL.Vertex3(this.posX+9, this.posY-3, 0);
+            GL.Vertex3(this.posX+9, this.posY-3, 0);
+            GL.Vertex3(this.posX+6, this.posY-3, 0);
+                GL.Vertex3(this.posX+6, this.posY-3, 0);
+                GL.Vertex3(this.posX+6, this.posY, 0);
+            GL.Vertex3(this.posX+6, this.posY, 0);
+            GL.Vertex3(this.posX, this.posY, 0);
 
             GL.End();
             GL.PopMatrix();
         }
 
         public Shot shooting(){
-            Shot playerShot = new Shot(this.posX+15, this.posY+12, 2);
+            Shot playerShot = new Shot(this.posX+15, this.posY+12, 3);
             this.bullet = playerShot;
 
             return playerShot;
@@ -209,6 +347,112 @@ public class main : MonoBehaviour
             this.inGame = true;
         }
 
+        public void enemyArt(Material mat){
+            GL.PushMatrix();
+            mat.SetPass(0);
+            GL.Begin(GL.LINES);
+
+            GL.Vertex3(this.posX+10, this.posY, 0);
+            GL.Vertex3(this.posX+14, this.posY, 0);
+                GL.Vertex3(this.posX+14, this.posY, 0);
+                GL.Vertex3(this.posX+14, this.posY+2, 0);
+            GL.Vertex3(this.posX+14, this.posY+2, 0);
+            GL.Vertex3(this.posX+16, this.posY+2, 0);
+                GL.Vertex3(this.posX+16, this.posY+2, 0);
+                GL.Vertex3(this.posX+16, this.posY, 0);
+            GL.Vertex3(this.posX+16, this.posY, 0);
+            GL.Vertex3(this.posX+20, this.posY, 0);
+                GL.Vertex3(this.posX+20, this.posY, 0);
+                GL.Vertex3(this.posX+20, this.posY+2, 0);
+            GL.Vertex3(this.posX+20, this.posY+2, 0);
+            GL.Vertex3(this.posX+22, this.posY+2, 0);
+                GL.Vertex3(this.posX+22, this.posY+2, 0);
+                GL.Vertex3(this.posX+22, this.posY+4, 0);
+            GL.Vertex3(this.posX+22, this.posY+4, 0);
+            GL.Vertex3(this.posX+24, this.posY+4, 0);
+                GL.Vertex3(this.posX+24, this.posY+4, 0);
+                GL.Vertex3(this.posX+24, this.posY+6, 0);
+            GL.Vertex3(this.posX+24, this.posY+6, 0);
+            GL.Vertex3(this.posX+26, this.posY+6, 0);
+                GL.Vertex3(this.posX+26, this.posY+6, 0);
+                GL.Vertex3(this.posX+26, this.posY+10, 0);
+            GL.Vertex3(this.posX+26, this.posY+10, 0);
+            GL.Vertex3(this.posX+28, this.posY+10, 0);
+                GL.Vertex3(this.posX+28, this.posY+10, 0);
+                GL.Vertex3(this.posX+28, this.posY+12, 0);
+            GL.Vertex3(this.posX+28, this.posY+12, 0);
+            GL.Vertex3(this.posX+30, this.posY+12, 0);
+                GL.Vertex3(this.posX+30, this.posY+12, 0);
+                GL.Vertex3(this.posX+30, this.posY+18, 0);
+            GL.Vertex3(this.posX+30, this.posY+18, 0);
+            GL.Vertex3(this.posX+26, this.posY+18, 0);
+                GL.Vertex3(this.posX+26, this.posY+18, 0);
+                GL.Vertex3(this.posX+26, this.posY+16, 0);
+            GL.Vertex3(this.posX+26, this.posY+16, 0);
+            GL.Vertex3(this.posX+22, this.posY+16, 0);
+                GL.Vertex3(this.posX+22, this.posY+16, 0);
+                GL.Vertex3(this.posX+22, this.posY+14, 0);
+            GL.Vertex3(this.posX+22, this.posY+14, 0);
+            GL.Vertex3(this.posX+20, this.posY+14, 0);
+                GL.Vertex3(this.posX+20, this.posY+14, 0);
+                GL.Vertex3(this.posX+20, this.posY+10, 0);
+            GL.Vertex3(this.posX+20, this.posY+10, 0);
+            GL.Vertex3(this.posX+18, this.posY+10, 0);
+                GL.Vertex3(this.posX+18, this.posY+10, 0);
+                GL.Vertex3(this.posX+18, this.posY+16, 0);
+            GL.Vertex3(this.posX+18, this.posY+16, 0);
+            GL.Vertex3(this.posX+16, this.posY+16, 0);
+                GL.Vertex3(this.posX+16, this.posY+16, 0);
+                GL.Vertex3(this.posX+16, this.posY+14, 0);
+            GL.Vertex3(this.posX+16, this.posY+14, 0);
+            GL.Vertex3(this.posX+14, this.posY+14, 0);
+                GL.Vertex3(this.posX+14, this.posY+14, 0);
+                GL.Vertex3(this.posX+14, this.posY+16, 0);
+            GL.Vertex3(this.posX+14, this.posY+16, 0);
+            GL.Vertex3(this.posX+12, this.posY+16, 0);
+                GL.Vertex3(this.posX+12, this.posY+16, 0);
+                GL.Vertex3(this.posX+12, this.posY+10, 0);
+            GL.Vertex3(this.posX+12, this.posY+10, 0);
+            GL.Vertex3(this.posX+10, this.posY+10, 0);
+                GL.Vertex3(this.posX+10, this.posY+10, 0);
+                GL.Vertex3(this.posX+10, this.posY+14, 0);
+            GL.Vertex3(this.posX+10, this.posY+14, 0);
+            GL.Vertex3(this.posX+8, this.posY+14, 0);
+                GL.Vertex3(this.posX+8, this.posY+14, 0);
+                GL.Vertex3(this.posX+8, this.posY+16, 0);
+            GL.Vertex3(this.posX+8, this.posY+16, 0);
+            GL.Vertex3(this.posX+4, this.posY+16, 0);
+                GL.Vertex3(this.posX+4, this.posY+16, 0);
+                GL.Vertex3(this.posX+4, this.posY+18, 0);
+            GL.Vertex3(this.posX+4, this.posY+18, 0);
+            GL.Vertex3(this.posX, this.posY+18, 0);
+                GL.Vertex3(this.posX, this.posY+18, 0);
+                GL.Vertex3(this.posX, this.posY+12, 0);
+            GL.Vertex3(this.posX, this.posY+12, 0);
+            GL.Vertex3(this.posX+2, this.posY+12, 0);
+                GL.Vertex3(this.posX+2, this.posY+12, 0);
+                GL.Vertex3(this.posX+2, this.posY+10, 0);
+            GL.Vertex3(this.posX+2, this.posY+10, 0);
+            GL.Vertex3(this.posX+4, this.posY+10, 0);
+                GL.Vertex3(this.posX+4, this.posY+10, 0);
+                GL.Vertex3(this.posX+4, this.posY+6, 0);
+            GL.Vertex3(this.posX+4, this.posY+6, 0);
+            GL.Vertex3(this.posX+6, this.posY+6, 0);
+                GL.Vertex3(this.posX+6, this.posY+6, 0);
+                GL.Vertex3(this.posX+6, this.posY+4, 0);
+            GL.Vertex3(this.posX+6, this.posY+4, 0);
+            GL.Vertex3(this.posX+8, this.posY+4, 0);
+                GL.Vertex3(this.posX+8, this.posY+4, 0);
+                GL.Vertex3(this.posX+8, this.posY+2, 0);
+            GL.Vertex3(this.posX+8, this.posY+2, 0);
+            GL.Vertex3(this.posX+10, this.posY+2, 0);
+                GL.Vertex3(this.posX+10, this.posY+2, 0);
+                GL.Vertex3(this.posX+10, this.posY, 0);
+
+            GL.End();
+            GL.PopMatrix();
+        }
+
         public bool collides(Shot shot){
             if(shot.posY+7 > this.posY && shot.posY < this.posY+20 && shot.posX+5 > this.posX && shot.posX < this.posX+20 ){
                 return true;
@@ -221,8 +465,8 @@ public class main : MonoBehaviour
 
             GL.PushMatrix();
             mat.SetPass(0);
-            GL.Color(Color.red);
             GL.Begin(GL.QUADS);
+            GL.Color(Color.blue);
 
             GL.Vertex3(this.posX, this.posY, 0);
             GL.Vertex3(this.posX, this.posY+20, 0);
@@ -235,7 +479,7 @@ public class main : MonoBehaviour
         }
 
         public Shot shooting(){
-            Shot enemyShot = new Shot(this.posX+10, this.posY-2, -2);
+            Shot enemyShot = new Shot(this.posX+10, this.posY-2, -3);
 
             return enemyShot;
         }
@@ -252,7 +496,7 @@ public class main : MonoBehaviour
         public void hitBox(Material mat){
             GL.PushMatrix();
             mat.SetPass(0);
-            GL.Color(Color.red);
+            GL.Color(Color.blue);
             GL.Begin(GL.QUADS);
 
             GL.Vertex3(this.posX, this.posY, 0);

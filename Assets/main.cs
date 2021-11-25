@@ -1,16 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class main : MonoBehaviour
 {
     public Material mat;    //Material utilizado para renderizar os objetos do jogo
     public Vector2 sb;      //Aparentemente a tela
 
-    bool playState = false; //Booleana responsável por renderizar ou não os objetos do jogo
-    public float posY = 0;      //Posição dos objetos no eixo Y
-    public float posX = 0;      //Posição dos objetos no eixo X
+    public bool playState; //Booleana responsável por renderizar ou não os objetos do jogo
+    public bool winState; //Booleana responsável por renderizar ou não os objetos do jogo
 
     public bool enemiesWalk = true;
     public bool walkAux = true;
@@ -22,6 +21,12 @@ public class main : MonoBehaviour
 
     List<Shot> gameShots = new List<Shot>();
 
+    public int life;
+    public int points;
+
+    public Text tPoints; 
+    public Text tLife; 
+
 
 
     #region Unity Methods
@@ -30,19 +35,24 @@ public class main : MonoBehaviour
     {
         sb = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height));
 
+        life = 2;
+        points = 0;
+
+        //Montagem dos inimigos
         for(int i = 0; i < 6; i++){
-            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*30)), 100);
+            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*38)), 100);
             enemies.Add(enemy);
         }
         for(int i = 0; i < 6; i++){
-            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*30)), 70);
+            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*38)), 70);
             enemies.Add(enemy);
         }
         for(int i = 0; i < 6; i++){
-            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*30)), 40);
+            Enemy enemy = new Enemy(((0-Screen.width/2)+(i*38)), 40);
             enemies.Add(enemy);
         }
 
+        //Cronometro para controle geral do jogo
         stopWatch.Start();
 
 
@@ -52,115 +62,173 @@ public class main : MonoBehaviour
     private void Update()
     {
         sb = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height));
-        
-        if(stopWatch.Elapsed.Seconds % 19 == 0 && stopWatch.Elapsed.Seconds != 0 && walkAux){
+
+        if(playState){
+
+            //Caso o inimigo chegue no fim da tela: descer e mudar a direcao do eixo X.
             foreach(Enemy enemy in enemies){
-                enemy.posY = enemy.posY - enemy.dy;
-            }
-            enemiesWalk = !enemiesWalk;
-            walkAux = false;
-        }
-
-        if(stopWatch.Elapsed.Seconds % 3 == 0 && enemiesWalk && stopWatch.Elapsed.Seconds != 0 && stopWatch.Elapsed.Seconds % 19 != 0){
-            foreach(Enemy enemy in enemies){
-                enemy.posX = enemy.posX + enemy.dx;
-            }
-            walkAux = true;
-        }
-        else if(stopWatch.Elapsed.Seconds % 3 == 0 && !enemiesWalk && stopWatch.Elapsed.Seconds != 0 && stopWatch.Elapsed.Seconds % 19 != 0){
-            foreach(Enemy enemy in enemies){
-                enemy.posX = enemy.posX - enemy.dx;
-            }
-            walkAux  = true;
-        }
-        
-
-        if(Input.GetKey(KeyCode.LeftArrow))
-        {
-            player.posX -= player.dx;
-        }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            player.posX += player.dx;
-        }
-        if (((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow))) && player.shot && player.inGame)
-        {
-            gameShots.Add(player.shooting());
-            player.shot = false;
-        }
-
-        foreach (var bullet in gameShots)
-        {
-            bullet.posY = bullet.posY + bullet.dy;
-
-            if(player.collides(bullet)){
-                gameShots.Remove(bullet);
-                player.inGame = false;
-            }
-
-            
-            if(bullet.posY > Screen.height - 100 || (bullet.posY+20 < (0 - Screen.height/2) && bullet.dy < 0)){
-                gameShots.Remove(bullet);
-                
-                if(bullet.Equals(player.bullet)){
-                    player.shot = true;
+                if((enemy.posX > Screen.width/2 || enemy.posX < 0-Screen.width/2) && stopWatch.Elapsed.Seconds > 5 && walkAux){
+                    foreach(Enemy enemyy in enemies){
+                        enemyy.posY = enemyy.posY - enemyy.dy;
+                    }
+                    enemiesWalk = !enemiesWalk;
+                    walkAux = false;
                 }
             }
 
+
+            //Inimigos se movem por 1s a cada 3s para a direita.
+            if(stopWatch.Elapsed.Seconds % 3 == 0 && enemiesWalk && stopWatch.Elapsed.Seconds != 0){
+                foreach(Enemy enemy in enemies){
+                    enemy.posX = enemy.posX + enemy.dx;
+                }
+                walkAux = true;
+            }
+
+            //Inimigos se movem por 1s a cada 3s para a esquerda.
+            else if(stopWatch.Elapsed.Seconds % 3 == 0 && !enemiesWalk && stopWatch.Elapsed.Seconds != 0){
+                foreach(Enemy enemy in enemies){
+                    enemy.posX = enemy.posX - enemy.dx;
+                }
+                walkAux  = true;
+            }
+            
+            //Movimento nave: para a esquerda
+            if(Input.GetKey(KeyCode.LeftArrow))
+            {
+                player.posX -= player.dx;
+            }
+            //Movimento nave: para a direita
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                player.posX += player.dx;
+            }
+            //Tiro da nave, caso o player esteja vivo.
+            if (((Input.GetKey(KeyCode.Space)) || (Input.GetKey(KeyCode.UpArrow))) && player.shot && player.inGame)
+            {
+                gameShots.Add(player.shooting());
+                player.shot = false;
+            }
+            if(Input.GetKey(KeyCode.R) && !player.inGame)
+            {
+                player.inGame = true;
+            }
+
+            
+
+            //Controle de colisao dos tiros do jogo
+            foreach (var bullet in gameShots)
+            {
+                bullet.posY = bullet.posY + bullet.dy;
+
+                //Se tiro colidir com o player
+                if(player.collides(bullet) && player.inGame){
+                    gameShots.Remove(bullet);
+                    player.inGame = false;
+                    life--;
+
+                    if(life < 1){
+                        playState = false;
+                    }
+
+                }
+
+                //Se tiro sair da tela
+                if(bullet.posY > Screen.height - 100 || (bullet.posY+20 < (0 - Screen.height/2) && bullet.dy < 0)){
+                    gameShots.Remove(bullet);
+                    
+                    if(bullet.Equals(player.bullet)){
+                        player.shot = true;
+                    }
+                }
+
+                //Se tiro colidir com os inimigos e esteja viajando para cima
+                foreach (var enemy in enemies)
+                {
+                    if(enemy.collides(bullet) && bullet.dy > 0){
+
+                        enemies.Remove(enemy);
+
+                        gameShots.Remove(bullet);
+                        player.shot = true;
+                        points+= 50;
+                    }
+                }
+                
+            }    
+            //Controle dos tiros dos inimigos
             foreach (var enemy in enemies)
             {
-                if(enemy.collides(bullet) && bullet.dy > 0){
-
-                    enemies.Remove(enemy);
-
-                    gameShots.Remove(bullet);
-                    player.shot = true;
-                }
+                if(Random.Range(0,1000) > 998){
+                    gameShots.Add(enemy.shooting());
+                } 
             }
-            
+
+            if(enemies.Count == 0){
+                playState = false;
+            }
+
+        }
+        else{
+            if(Input.GetKey(KeyCode.Space)){
+                enemies.Clear();
+                gameShots.Clear();
+                Start();
+                player.inGame = true;
+                player.shot = true;
+                playState = true;
+            }
         }
 
-        foreach (var enemy in enemies)
-        {
-            if(Random.Range(0,1000) > 998){
-                gameShots.Add(enemy.shooting());
-            } 
-        }
+        tPoints.text = "Points: "+points.ToString();
+        tLife.text = "Lifes: "+life.ToString();
 
     }
 
     private void OnPostRender()
     {
-        foreach(Enemy enemy in enemies){
-            //enemy.hitBox(mat);
-            enemy.enemyArt(mat);
 
+        if(playState){
+
+            //Renderização dos inimigos
+            foreach(Enemy enemy in enemies){
+                //enemy.hitBox(mat);
+                enemy.enemyArt(mat);
+
+            }
+
+            //Renderização do player
+            if(player.inGame){
+                //player.hitBox(mat);
+                player.playerArt(mat);
+            }
+
+
+            //Renderização das balas
+            foreach (var bullet in gameShots)
+            {
+                bullet.hitBox(mat);
+            }
         }
-
-        if(player.inGame){
-            //player.hitBox(mat);
-            player.playerArt(mat);
-        }
-
-
-        foreach (var bullet in gameShots)
-        {
-            bullet.hitBox(mat);
-        }
+        
     }
     #endregion
 
     #region My Methods
+    public void StartGame(){
+        playState = true;
+    }
 
     #endregion
 
     
     #region My Objects
 
+
     public class Player{
         public float posX;
         public float posY;
-        public float dx = 2;
+        public float dx = 2;    //Velocidade no eixo X
         public bool inGame;
         public bool shot;
         public Shot bullet;
@@ -173,7 +241,7 @@ public class main : MonoBehaviour
         }
 
         public bool collides(Shot shot){
-            if(shot.posY+7 > this.posY && shot.posY < this.posY+10 && shot.posX+5 > this.posX && shot.posX < this.posX+30 ){
+            if(shot.posY > this.posY && shot.posY+7 < this.posY+19 && shot.posX+5 > this.posX && shot.posX < this.posX+55 ){
                 return true;
             }
 
@@ -183,7 +251,6 @@ public class main : MonoBehaviour
         public void hitBox(Material mat){
             GL.PushMatrix();
             mat.SetPass(0);
-            GL.Color(Color.blue);
             GL.Begin(GL.QUADS);
 
             GL.Vertex3(this.posX, this.posY, 0);
@@ -198,6 +265,7 @@ public class main : MonoBehaviour
             GL.PushMatrix();
             mat.SetPass(0);
             GL.Begin(GL.LINES);
+            GL.Color(Color.white);
 
             GL.Vertex3(this.posX, this.posY, 0);
             GL.Vertex3(this.posX, this.posY+3, 0);
@@ -277,34 +345,34 @@ public class main : MonoBehaviour
                 GL.Vertex3(this.posX+42, this.posY+3, 0);
             GL.Vertex3(this.posX+42, this.posY+3, 0);
             GL.Vertex3(this.posX+39, this.posY+3, 0);
-                GL.Vertex3(this.posX+39, this.posY+3, 0);
-                GL.Vertex3(this.posX+39, this.posY-3, 0);
-            GL.Vertex3(this.posX+39, this.posY-3, 0);
-            GL.Vertex3(this.posX+36, this.posY-3, 0);
-                GL.Vertex3(this.posX+36, this.posY-3, 0);
-                GL.Vertex3(this.posX+36, this.posY-6, 0);
-            GL.Vertex3(this.posX+36, this.posY-6, 0);
-            GL.Vertex3(this.posX+33, this.posY-6, 0);
-                GL.Vertex3(this.posX+33, this.posY-6, 0);
-                GL.Vertex3(this.posX+33, this.posY, 0);
-            GL.Vertex3(this.posX+33, this.posY, 0);
-            GL.Vertex3(this.posX+30, this.posY, 0);
-                GL.Vertex3(this.posX+30, this.posY, 0);
-                GL.Vertex3(this.posX+30, this.posY+3, 0);
+            //     GL.Vertex3(this.posX+39, this.posY+3, 0);
+            //     GL.Vertex3(this.posX+39, this.posY-3, 0);
+            // GL.Vertex3(this.posX+39, this.posY-3, 0);
+            // GL.Vertex3(this.posX+36, this.posY-3, 0);
+            //     GL.Vertex3(this.posX+36, this.posY-3, 0);
+            //     GL.Vertex3(this.posX+36, this.posY-6, 0);
+            // GL.Vertex3(this.posX+36, this.posY-6, 0);
+            // GL.Vertex3(this.posX+33, this.posY-6, 0);
+            //     GL.Vertex3(this.posX+33, this.posY-6, 0);
+            //     GL.Vertex3(this.posX+33, this.posY, 0);
+            // GL.Vertex3(this.posX+33, this.posY, 0);
+            // GL.Vertex3(this.posX+30, this.posY, 0);
+                // GL.Vertex3(this.posX+30, this.posY, 0);
+                // GL.Vertex3(this.posX+30, this.posY+3, 0);
             GL.Vertex3(this.posX+30, this.posY+3, 0);
             GL.Vertex3(this.posX+24, this.posY+3, 0);
                 GL.Vertex3(this.posX+24, this.posY+3, 0);
                 GL.Vertex3(this.posX+24, this.posY, 0);
-            GL.Vertex3(this.posX+24, this.posY, 0);
-            GL.Vertex3(this.posX+21, this.posY, 0);
-                GL.Vertex3(this.posX+21, this.posY, 0);
-                GL.Vertex3(this.posX+21, this.posY-6, 0);
-            GL.Vertex3(this.posX+21, this.posY-6, 0);
-            GL.Vertex3(this.posX+18, this.posY-6, 0);
-                GL.Vertex3(this.posX+18, this.posY-6, 0);
-                GL.Vertex3(this.posX+18, this.posY-3, 0);
-            GL.Vertex3(this.posX+18, this.posY-3, 0);
-            GL.Vertex3(this.posX+15, this.posY-3, 0);
+            // GL.Vertex3(this.posX+24, this.posY, 0);
+            // GL.Vertex3(this.posX+21, this.posY, 0);
+            //     GL.Vertex3(this.posX+21, this.posY, 0);
+            //     GL.Vertex3(this.posX+21, this.posY-6, 0);
+            // GL.Vertex3(this.posX+21, this.posY-6, 0);
+            // GL.Vertex3(this.posX+18, this.posY-6, 0);
+            //     GL.Vertex3(this.posX+18, this.posY-6, 0);
+            //     GL.Vertex3(this.posX+18, this.posY-3, 0);
+            // GL.Vertex3(this.posX+18, this.posY-3, 0);
+            // GL.Vertex3(this.posX+15, this.posY-3, 0);
                 GL.Vertex3(this.posX+15, this.posY-3, 0);
                 GL.Vertex3(this.posX+15, this.posY+3, 0);
             GL.Vertex3(this.posX+15, this.posY+3, 0);
@@ -323,11 +391,70 @@ public class main : MonoBehaviour
             GL.Vertex3(this.posX, this.posY, 0);
 
             GL.End();
+
+            GL.Begin(GL.QUADS);
+            GL.Color(new Color(237f/255f, 0, 0, 1));              //Vermelho
+
+            GL.Vertex3(this.posX+39, this.posY+21, 0);
+            GL.Vertex3(this.posX+39, this.posY+25, 0);
+            GL.Vertex3(this.posX+42, this.posY+25, 0);
+            GL.Vertex3(this.posX+42, this.posY+21, 0);
+
+            GL.Vertex3(this.posX+12, this.posY+21, 0);
+            GL.Vertex3(this.posX+12, this.posY+25, 0);
+            GL.Vertex3(this.posX+15, this.posY+25, 0);
+            GL.Vertex3(this.posX+15, this.posY+21, 0);
+
+            GL.Vertex3(this.posX+36, this.posY, 0);
+            GL.Vertex3(this.posX+36, this.posY-6, 0);
+            GL.Vertex3(this.posX+33, this.posY-6, 0);
+            GL.Vertex3(this.posX+33, this.posY, 0);
+
+            GL.Vertex3(this.posX+21, this.posY, 0);
+            GL.Vertex3(this.posX+21, this.posY-6, 0);
+            GL.Vertex3(this.posX+18, this.posY-6, 0);
+            GL.Vertex3(this.posX+18, this.posY, 0);
+
+            GL.Vertex3(this.posX+24, this.posY, 0);
+            GL.Vertex3(this.posX+24, this.posY+3, 0);
+            GL.Vertex3(this.posX+21, this.posY+3, 0);
+            GL.Vertex3(this.posX+21, this.posY, 0);
+
+            GL.Vertex3(this.posX+33, this.posY, 0);
+            GL.Vertex3(this.posX+33, this.posY+3, 0);
+            GL.Vertex3(this.posX+30, this.posY+3, 0);
+            GL.Vertex3(this.posX+30, this.posY, 0);
+
+            GL.Color(new Color(230f/255f, 157f/255f, 27f/255f, 1));   //Amarelo
+
+            GL.Vertex3(this.posX+36, this.posY, 0);
+            GL.Vertex3(this.posX+36, this.posY+3, 0);
+            GL.Vertex3(this.posX+33, this.posY+3, 0);
+            GL.Vertex3(this.posX+33, this.posY, 0);
+
+            GL.Vertex3(this.posX+21, this.posY, 0);
+            GL.Vertex3(this.posX+21, this.posY+3, 0);
+            GL.Vertex3(this.posX+18, this.posY+3, 0);
+            GL.Vertex3(this.posX+18, this.posY, 0);
+
+            GL.Color(new Color(248f/255f, 105f/255f, 18f/255f, 1));   //Laranja
+            
+            GL.Vertex3(this.posX+18, this.posY-3, 0);
+            GL.Vertex3(this.posX+18, this.posY+3, 0);
+            GL.Vertex3(this.posX+15, this.posY+3, 0);
+            GL.Vertex3(this.posX+15, this.posY-3, 0);
+            
+            GL.Vertex3(this.posX+39, this.posY-3, 0);
+            GL.Vertex3(this.posX+39, this.posY+3, 0);
+            GL.Vertex3(this.posX+36, this.posY+3, 0);
+            GL.Vertex3(this.posX+36, this.posY-3, 0);
+            
+            GL.End();
             GL.PopMatrix();
         }
 
         public Shot shooting(){
-            Shot playerShot = new Shot(this.posX+15, this.posY+12, 3);
+            Shot playerShot = new Shot(this.posX+25, this.posY+12, 3);
             this.bullet = playerShot;
 
             return playerShot;
@@ -337,8 +464,8 @@ public class main : MonoBehaviour
     public class Enemy{
         public float posX;
         public float posY;
-        public float dx = 0.25f;
-        public float dy = 2;
+        public float dx = 0.5f;
+        public float dy = 20;
         public bool inGame;
         public Enemy(float posX, float posY){
             this.posX = posX;
@@ -351,6 +478,7 @@ public class main : MonoBehaviour
             GL.PushMatrix();
             mat.SetPass(0);
             GL.Begin(GL.LINES);
+            GL.Color(Color.white);
 
             GL.Vertex3(this.posX+10, this.posY, 0);
             GL.Vertex3(this.posX+14, this.posY, 0);
@@ -450,11 +578,26 @@ public class main : MonoBehaviour
                 GL.Vertex3(this.posX+10, this.posY, 0);
 
             GL.End();
+
+            GL.Begin(GL.QUADS);
+            GL.Color(new Color(237f/255f, 0, 0, 1));              //Vermelho
+
+            GL.Vertex3(this.posX+12, this.posY+8, 0);
+            GL.Vertex3(this.posX+14, this.posY+8, 0);
+            GL.Vertex3(this.posX+14, this.posY+10, 0);
+            GL.Vertex3(this.posX+12, this.posY+10, 0);
+
+            GL.Vertex3(this.posX+16, this.posY+8, 0);
+            GL.Vertex3(this.posX+18, this.posY+8, 0);
+            GL.Vertex3(this.posX+18, this.posY+10, 0);
+            GL.Vertex3(this.posX+16, this.posY+10, 0);
+
+            GL.End();
             GL.PopMatrix();
         }
 
         public bool collides(Shot shot){
-            if(shot.posY+7 > this.posY && shot.posY < this.posY+20 && shot.posX+5 > this.posX && shot.posX < this.posX+20 ){
+            if(shot.posY+7 > this.posY+5 && shot.posY < this.posY+20 && shot.posX+5 > this.posX && shot.posX < this.posX+30 ){
                 return true;
             }
 
@@ -468,10 +611,10 @@ public class main : MonoBehaviour
             GL.Begin(GL.QUADS);
             GL.Color(Color.blue);
 
-            GL.Vertex3(this.posX, this.posY, 0);
+            GL.Vertex3(this.posX, this.posY+5, 0);
             GL.Vertex3(this.posX, this.posY+20, 0);
-            GL.Vertex3(this.posX+20, this.posY+20, 0);
-            GL.Vertex3(this.posX+20, this.posY, 0);
+            GL.Vertex3(this.posX+30, this.posY+20, 0);
+            GL.Vertex3(this.posX+30, this.posY+5, 0);
 
             GL.End();
             GL.PopMatrix();
@@ -485,7 +628,7 @@ public class main : MonoBehaviour
         }
     }
 
-    public class Cover{
+    public class Cover{ // Não deu tempo de implementar :(
         public float posX;
         public float posY;
         public Cover(float posX, float posY){
@@ -524,6 +667,7 @@ public class main : MonoBehaviour
             GL.PushMatrix();
             mat.SetPass(0);
             GL.Begin(GL.QUADS);
+            GL.Color(Color.white);
 
             GL.Vertex3(this.posX, this.posY, 0);
             GL.Vertex3(this.posX, this.posY+7, 0);
